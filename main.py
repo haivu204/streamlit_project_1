@@ -4,13 +4,23 @@ from google.cloud import firestore
 # Authenticate to Firestore with the JSON account key.
 db = firestore.Client.from_service_account_json("fire_store_key.json")
 
-# Create a reference to the Google post.
-doc_ref = db.collection("post").document("facebook")
+title = st.text_input("post title")
+content = st.text_input("content")
+submit = st.button("submit new post")
 
-# Then get the data at that reference.
-doc = doc_ref.get()
+if title and content and submit:
+    doc_ref = db.collection("post").document(title)
+    doc_ref.set({
+        "title": title,
+        "content": content
+    })
 
-# Let's see what we got!
-st.write("The id is: ", doc.id)
+post_ref = db.collection("post")
 
-st.write("The contents are: ", doc.to_dict())
+for doc in post_ref.stream():
+    post = doc.to_dict()
+    title = post["title"]
+    content = post["content"]
+
+    st.subheader(f"post: {title}")
+    st.write(f"content: {content}")
